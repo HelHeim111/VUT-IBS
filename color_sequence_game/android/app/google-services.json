@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "582311704833",
+    "project_id": "color-sequence-game",
+    "storage_bucket": "color-sequence-game.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:582311704833:android:72bbb7374693843ef4c300",
+        "android_client_info": {
+          "package_name": "com.example.color_sequence_game"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC0wW42MKaAqjsS8BWsDgCi2JvEyBrEnR4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
