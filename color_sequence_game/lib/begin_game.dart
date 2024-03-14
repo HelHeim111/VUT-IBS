@@ -15,6 +15,7 @@ class _BeginGameState extends State<BeginGame> {
   List<Color> colors = List.generate(16, (index) => Colors.white);
   List<int> rightOrder = [];
   List<int> userSequence = [];
+  List<int> greySquares = [];
   int stmThreshold = 3;
   int pairsLightUp = 0;
   int mistakes = 0;
@@ -89,6 +90,7 @@ class _BeginGameState extends State<BeginGame> {
       sequenceCompleted = false;
       firstGame = false;
       userSequence.clear();
+      greySquares.clear();
     });
     startTimer();
   }
@@ -108,26 +110,35 @@ class _BeginGameState extends State<BeginGame> {
             ),
             itemCount: 16,
             itemBuilder: (context, index) {
-              bool isPressed = userSequence.contains(index);
+              bool isPressed = greySquares.contains(index);
               Color bgColor = isPressed ? Colors.grey[300]! : colors[index];
               return GestureDetector(
                 onTap: () {
                   if (!sequenceCompleted && finishedShowingSequence) {
                     setState(() {
                       userSequence.add(index);
+                      greySquares.add(index);
                       if (userSequence.length == rightOrder.length) {
                         checkSequence();
                       }
                     });
+                    // Change the color to grey temporarily
+                    Future.delayed(Duration(milliseconds: 200), () {
+                      setState(() {
+                        greySquares.remove(index);
+                      });
+                    });
                   }
                 },
-                child: Container(
+                child: AnimatedContainer(
+                  duration: Duration(milliseconds: 200),
                   color: bgColor,
                   margin: EdgeInsets.all(4),
                 ),
               );
             },
           ),
+
 
           SizedBox(height: 20),
           if (sequenceCompleted)
@@ -159,3 +170,8 @@ class _BeginGameState extends State<BeginGame> {
     );
   }
 }
+
+/*
+* !!! CHANGE THE ANIMATION WHEN SHOWING THE CORRECT SEQUENCE
+* ITS DISTRACTING TOO MUCH!!!
+* */
