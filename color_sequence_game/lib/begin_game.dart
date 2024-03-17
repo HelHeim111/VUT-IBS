@@ -23,6 +23,14 @@ class _BeginGameState extends State<BeginGame> {
   bool firstGame = true;
   bool finishedShowingSequence = false;
   late Timer timer;
+  late DateTime startTime;
+  late DateTime delayTimeStart = DateTime.now();
+  double delayTime = 0.0;
+  List<double> reactionTimes = [];
+  double totalReactionTime = 0.0;
+  double reactionTime = 0.0;
+  double averageReactionTime = 0.0;
+
 
   @override
   void initState() {
@@ -37,9 +45,11 @@ class _BeginGameState extends State<BeginGame> {
 
   void startTimer() {
     rightOrder = List.generate(stmThreshold, (_) => 0);
+
     timer = Timer.periodic(Duration(seconds: 2), (Timer t) {
       if (pairsLightUp < stmThreshold) {
         setState(() {
+
           colors = List.generate(16, (index) => Colors.white);
           int randomSquare1 = Random().nextInt(16);
           int randomSquare2, randomSquare3;
@@ -58,6 +68,7 @@ class _BeginGameState extends State<BeginGame> {
           rightOrder[pairsLightUp] = randomSquare1;
         });
         pairsLightUp += 1;
+        startTime = DateTime.now();
       } else {
         Future.delayed(Duration(seconds: 1), () {
           setState(() {
@@ -70,6 +81,19 @@ class _BeginGameState extends State<BeginGame> {
     });
   }
 
+  void addReactionTime(double time) {
+    setState(() {
+      reactionTimes.add(time);
+      totalReactionTime += time;
+    });
+  }
+
+  void calculateAverageReactionTime() {
+    averageReactionTime = totalReactionTime / stmThreshold;
+    print("Average Reaction Time: $averageReactionTime seconds");
+  }
+
+
   void checkSequence() {
     if (!sequenceCompleted) {
       setState(() {
@@ -79,6 +103,7 @@ class _BeginGameState extends State<BeginGame> {
           }
         }
         sequenceCompleted = true;
+        calculateAverageReactionTime();
       });
     }
   }
@@ -91,6 +116,7 @@ class _BeginGameState extends State<BeginGame> {
       firstGame = false;
       userSequence.clear();
       greySquares.clear();
+      reactionTime = 0.0;
     });
     startTimer();
   }
@@ -113,7 +139,24 @@ class _BeginGameState extends State<BeginGame> {
               bool isPressed = greySquares.contains(index);
               Color bgColor = isPressed ? Colors.grey[300]! : colors[index];
               return GestureDetector(
+                child: (!sequenceCompleted && finishedShowingSequence) ? AnimatedContainer(
+                  duration: Duration(milliseconds: 200),
+                  color: bgColor,
+                  margin: EdgeInsets.all(4),
+                ) : Container(
+                  color: bgColor,
+                  margin: EdgeInsets.all(4),
+                ),
                 onTap: () {
+                  delayTimeStart = DateTime.now();
+                  if (!finishedShowingSequence) {
+                    DateTime endTime = DateTime.now();
+                    reactionTime = endTime
+                        .difference(startTime)
+                        .inMilliseconds /
+                        1000;
+                    addReactionTime(reactionTime);
+                  }
                   if (!sequenceCompleted && finishedShowingSequence) {
                     setState(() {
                       userSequence.add(index);
@@ -121,20 +164,18 @@ class _BeginGameState extends State<BeginGame> {
                       if (userSequence.length == rightOrder.length) {
                         checkSequence();
                       }
-                    });
-                    // Change the color to grey temporarily
-                    Future.delayed(Duration(milliseconds: 200), () {
-                      setState(() {
-                        greySquares.remove(index);
+
+                      // Change the color to grey temporarily
+                      Future.delayed(Duration(milliseconds: 200), () {
+                        setState(() {
+                          greySquares.remove(index);
+                        });
                       });
                     });
                   }
+
                 },
-                child: AnimatedContainer(
-                  duration: Duration(milliseconds: 200),
-                  color: bgColor,
-                  margin: EdgeInsets.all(4),
-                ),
+
               );
             },
           ),
@@ -153,6 +194,7 @@ class _BeginGameState extends State<BeginGame> {
                   onPressed: resetGame,
                   child: Text("Restart"),
                 ),
+                Text("Your avarage rt: $averageReactionTime")
               ],
             ),
           if (!sequenceCompleted && firstGame)
@@ -164,14 +206,17 @@ class _BeginGameState extends State<BeginGame> {
                   child: Text('Start Game'),
                 ),
               ]
-            )
+            ),
+          if (reactionTime > 0.0)
+            Column(
+              children: [
+                SizedBox(height: 10),
+                Text("Your rt: $reactionTime")
+              ],
+            ),
         ],
       ),
     );
   }
 }
 
-/*
-* !!! CHANGE THE ANIMATION WHEN SHOWING THE CORRECT SEQUENCE
-* ITS DISTRACTING TOO MUCH!!!
-* */
