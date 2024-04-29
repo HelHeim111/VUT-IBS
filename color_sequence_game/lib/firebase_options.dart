@@ -4,37 +4,18 @@ import 'package:firebase_core/firebase_core.dart' show FirebaseOptions;
 import 'package:flutter/foundation.dart'
     show defaultTargetPlatform, kIsWeb, TargetPlatform;
 
-/// Default [FirebaseOptions] for use with your Firebase apps.
-///
-/// Example:
-/// ```dart
-/// import 'firebase_options.dart';
-/// // ...
-/// await Firebase.initializeApp(
-///   options: DefaultFirebaseOptions.currentPlatform,
-/// );
-/// ```
 class DefaultFirebaseOptions {
   static FirebaseOptions get currentPlatform {
     if (kIsWeb) {
-      throw UnsupportedError(
-        'DefaultFirebaseOptions have not been configured for web - '
-        'you can reconfigure this by running the FlutterFire CLI again.',
-      );
+      return web;
     }
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:
         return android;
       case TargetPlatform.iOS:
-        throw UnsupportedError(
-          'DefaultFirebaseOptions have not been configured for ios - '
-          'you can reconfigure this by running the FlutterFire CLI again.',
-        );
+        return ios;
       case TargetPlatform.macOS:
-        throw UnsupportedError(
-          'DefaultFirebaseOptions have not been configured for macos - '
-          'you can reconfigure this by running the FlutterFire CLI again.',
-        );
+        return macos;
       case TargetPlatform.windows:
         throw UnsupportedError(
           'DefaultFirebaseOptions have not been configured for windows - '
@@ -52,11 +33,38 @@ class DefaultFirebaseOptions {
     }
   }
 
+  static const FirebaseOptions web = FirebaseOptions(
+    apiKey: 'AIzaSyBygO6KCTINfloG9A239KypZ2E_uzkG9Mw',
+    appId: '1:582311704833:web:3c10a2995cd6105bf4c300',
+    messagingSenderId: '582311704833',
+    projectId: 'color-sequence-game',
+    authDomain: 'color-sequence-game.firebaseapp.com',
+    storageBucket: 'color-sequence-game.appspot.com',
+  );
+
   static const FirebaseOptions android = FirebaseOptions(
     apiKey: 'AIzaSyC0wW42MKaAqjsS8BWsDgCi2JvEyBrEnR4',
     appId: '1:582311704833:android:72bbb7374693843ef4c300',
     messagingSenderId: '582311704833',
     projectId: 'color-sequence-game',
     storageBucket: 'color-sequence-game.appspot.com',
+  );
+
+  static const FirebaseOptions ios = FirebaseOptions(
+    apiKey: 'AIzaSyBJx_-iLz4eeG2D3DpGnoDHdKQC9pm2QYU',
+    appId: '1:582311704833:ios:60194132a72c1848f4c300',
+    messagingSenderId: '582311704833',
+    projectId: 'color-sequence-game',
+    storageBucket: 'color-sequence-game.appspot.com',
+    iosBundleId: 'com.example.colorSequenceGame',
+  );
+
+  static const FirebaseOptions macos = FirebaseOptions(
+    apiKey: 'AIzaSyBJx_-iLz4eeG2D3DpGnoDHdKQC9pm2QYU',
+    appId: '1:582311704833:ios:a455aa8b916ad4ccf4c300',
+    messagingSenderId: '582311704833',
+    projectId: 'color-sequence-game',
+    storageBucket: 'color-sequence-game.appspot.com',
+    iosBundleId: 'com.example.colorSequenceGame.RunnerTests',
   );
 }
