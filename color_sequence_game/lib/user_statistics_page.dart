@@ -20,6 +20,7 @@ class _UserStatisticsPageState extends State<UserStatisticsPage> {
 
   List<StatisticData> _statisticDataList = [];
   int _selectedIndex = 2;
+  // Initializes the state, fetches current user and sets default category
   @override
   void initState() {
     super.initState();
@@ -27,6 +28,7 @@ class _UserStatisticsPageState extends State<UserStatisticsPage> {
     _selectedCategory = 'Reaction Time';
   }
 
+  // Fetches the current user and related data
   Future<void> _fetchCurrentUser() async {
     _currentUser = FirebaseAuth.instance.currentUser;
     if (_currentUser != null) {
@@ -35,6 +37,7 @@ class _UserStatisticsPageState extends State<UserStatisticsPage> {
     }
   }
 
+  // Fetches user data from Firestore
   Future<void> _fetchUserData(String userId) async {
     DocumentSnapshot userSnapshot = await FirebaseFirestore.instance
         .collection('users')
@@ -51,7 +54,7 @@ class _UserStatisticsPageState extends State<UserStatisticsPage> {
       });
     }
   }
-
+  // Handles navigation based on selected index from BottomNavigationBar
   void _onItemTapped(int index) {
     // Set the state to update the selectedIndex
     setState(() {
@@ -75,6 +78,7 @@ class _UserStatisticsPageState extends State<UserStatisticsPage> {
     }
   }
 
+  // Fetches statistical data for the user from Firestore
   Future<void> _fetchStatisticData(String userId) async {
     QuerySnapshot querySnapshot = await FirebaseFirestore.instance
         .collection('users')
@@ -122,13 +126,14 @@ class _UserStatisticsPageState extends State<UserStatisticsPage> {
 
     setState(() {});
   }
-
+  // Formats the DateTime into a string for hourly keys
   String _formatHour(DateTime timestamp) {
     return '${timestamp.year}-${timestamp.month.toString().padLeft(2, '0')}-'
         '${timestamp.day.toString().padLeft(2, '0')} '
         '${timestamp.hour.toString().padLeft(2, '0')}';
   }
 
+  // Building UI
   @override
   Widget build(BuildContext context) {
     return Scaffold(

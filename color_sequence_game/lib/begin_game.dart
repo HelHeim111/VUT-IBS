@@ -15,6 +15,7 @@ class BeginGame extends StatefulWidget {
 }
 
 class _BeginGameState extends State<BeginGame> {
+  // Initializes variables for game logic
   List<Color> colors = List.generate(16, (index) => Colors.white);
   List<int> rightOrder = [];
   List<int> redOrder = [];
@@ -38,8 +39,9 @@ class _BeginGameState extends State<BeginGame> {
   double averageReactionTime = 0.0;
   int _selectedIndex = 1;
   int games_played = 0;
-  bool showGuide = false;
 
+  bool showGuide = false;
+  bool showResults = false;
   dynamic user_name = "";
   int user_age = 0;
 
@@ -53,7 +55,7 @@ class _BeginGameState extends State<BeginGame> {
     timer.cancel();
     super.dispose();
   }
-
+  // Handles bottom navigation bar taps
   void _onItemTapped(int index) {
     // Set the state to update the selectedIndex
     setState(() {
@@ -73,7 +75,7 @@ class _BeginGameState extends State<BeginGame> {
         break;
     }
   }
-
+  // Fetches user statistics data from Firestore
   Future<void> fetchStatisticData() async {
     // Get the currently authenticated user
     User? user = FirebaseAuth.instance.currentUser;
@@ -102,16 +104,19 @@ class _BeginGameState extends State<BeginGame> {
       }
     }
   }
-
+  // Starts the timer for the sequence display
   void startTimer() async {
     await fetchStatisticData();
     rightOrder = List.generate(stmThreshold, (_) => 0);
     redOrder = List.generate(stmThreshold, (_) => 0);
     greenOrder = List.generate(stmThreshold, (_) => 0);
 
-    timer = Timer.periodic(Duration(seconds: 2), (Timer t) {
+    int randomInterval = Random().nextInt(1000) + 1500;
+
+    timer = Timer.periodic(Duration(milliseconds: randomInterval), (Timer t) {
       if (pairsLightUp < stmThreshold) {
         setState(() {
+          // Generates a new sequence of colors
           colors = List.generate(16, (index) => Colors.white);
           int randomSquare1 = Random().nextInt(16);
           int randomSquare2, randomSquare3;
@@ -144,19 +149,18 @@ class _BeginGameState extends State<BeginGame> {
       }
     });
   }
-
+  // Records a reaction time
   void addReactionTime(double time) {
     setState(() {
       reactionTimes.add(time);
       totalReactionTime += time;
     });
   }
-
+  // Calculates the average reaction time
   void calculateAverageReactionTime() {
     averageReactionTime = totalReactionTime / stmThreshold * 1000;
-    print("Average Reaction Time: $averageReactionTime seconds");
   }
-
+  // Saves user data to Firestore
   void saveUserData(double averageReactionTime, int mistakes) async {
     // Get the current date and time
     DateTime now = DateTime.now();
@@ -198,7 +202,6 @@ class _BeginGameState extends State<BeginGame> {
             .set(gameData);
         print('Game data saved successfully!');
       } catch (e) {
-        // Handle any errors
         print('Error saving game data: $e');
       }
       try {
@@ -209,14 +212,13 @@ class _BeginGameState extends State<BeginGame> {
             .doc('progress')
             .set(userProgressData);
       } catch (e) {
-        // Handle any errors
         print('Error saving game data: $e');
       }
     } else {
-      print('User is not logged in.'); // Handle this case appropriately
+      print('User is not logged in.');
     }
   }
-
+  // Checks if the user sequence matches the generated sequence
   void checkSequence() {
     if (!sequenceCompleted) {
       setState(() {
@@ -231,10 +233,11 @@ class _BeginGameState extends State<BeginGame> {
         sequenceCompleted = true;
         calculateAverageReactionTime();
         saveUserData(averageReactionTime, mistakes);
+        showResults = true;
       });
     }
   }
-
+  // Resets the game state to start a new round
   void resetGame() {
     setState(() {
       pairsLightUp = 0;
@@ -255,33 +258,52 @@ class _BeginGameState extends State<BeginGame> {
     });
     startTimer();
   }
-
+  // Toggles the visibility of the game guide
   void toggleGuide() {
     setState(() {
       showGuide = !showGuide;
+      if (!firstGame) {
+        showResults = !showResults;
+      }
+
     });
   }
-
+  // Builds the guide widget for game instructions
   Widget buildGuideWidget() {
     if (showGuide) {
       return Container(
         padding: EdgeInsets.all(16),
         color: Colors.grey[200],
-        child: Text(
-          "How to Play:\n\n"
-              "1. Memorize the sequence of blue squares that light up.\n"
-              "2. After new trinity of squares lights up, tap as fast as you can on the field\n"
-              "3. Tap on the squares in the same order as the blue sequence after the whole sequence is displayed.\n"
-              "4. Try to complete the sequence with the least number of mistakes.\n"
-              "5. Have fun!",
-          style: TextStyle(fontSize: 16),
+        child: RichText(
+          text: TextSpan(
+            style: TextStyle(fontSize: 16, color: Colors.black),
+            children: <TextSpan>[
+              TextSpan(text: "How to Play:\n\n"),
+              TextSpan(text: "1. Memorize the Sequence:", style: TextStyle(fontWeight: FontWeight.bold)),
+              TextSpan(text: " Watch carefully as a series of "),
+              TextSpan(text: "blue", style: TextStyle(color: Colors.blue)),
+              TextSpan(text: " squares light up on the screen. These squares indicate the sequence you need to remember. Pay close attention to the order in which they appear.\n"),
+              TextSpan(text: "2. Quick Response:", style: TextStyle(fontWeight: FontWeight.bold)),
+              TextSpan(text: " Once a new set of three squares lights up, quickly tap"),
+              TextSpan(text: " anywhere on the playing field.", style: TextStyle(fontWeight: FontWeight.bold)),
+              TextSpan(text: " This step tests your reflexes and the speed of your response.\n"),
+              TextSpan(text: "3. Recreate the Sequence:", style: TextStyle(fontWeight: FontWeight.bold)),
+              TextSpan(text: " After the entire sequence of "),
+              TextSpan(text: "blue", style: TextStyle(color: Colors.blue)),
+              TextSpan(text: " squares has been shown, begin tapping the squares in the exact order they were illuminated. This part of the game assesses your memory and ability to recall the sequence correctly.\n"),
+              TextSpan(text: "4. Minimize Errors:", style: TextStyle(fontWeight: FontWeight.bold)),
+              TextSpan(text: " Attempt to replicate the sequence as accurately as possible.\n"),
+              TextSpan(text: "5. Have fun!", style: TextStyle(fontWeight: FontWeight.bold)),
+            ],
+          ),
         ),
       );
     } else {
-      return Container(); // Return an empty container if guide is not to be shown
+      return Container(); // Return an empty container if the guide is not to be shown
     }
   }
 
+  // Main widget build method
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -353,27 +375,20 @@ class _BeginGameState extends State<BeginGame> {
                 ),
               ),
               buildGuideWidget(),
-              SizedBox(height: 20),
-              if (sequenceCompleted)
+              if (showResults) // Conditional rendering based on the new `showResults` state
                 Column(
                   children: [
-                    Text(
-                      "Mistakes: $mistakes",
-                      style: TextStyle(fontSize: 20),
-                    ),
+                    Text("Mistakes: $mistakes", style: TextStyle(fontSize: 20)),
                     SizedBox(height: 10),
                     ElevatedButton(
                       onPressed: resetGame,
-                      child: Text(
-                        "Restart",
-                        style: TextStyle(fontSize: 18),
-                      ),
+                      child: Text("Restart", style: TextStyle(fontSize: 18)),
                     ),
                     SizedBox(height: 10),
                     Text(
                       "Your average reaction time: ${averageReactionTime.toStringAsFixed(1)}ms",
                       style: TextStyle(fontSize: 16),
-                    )
+                    ),
                   ],
                 ),
               if (!sequenceCompleted && firstGame)
@@ -387,10 +402,7 @@ class _BeginGameState extends State<BeginGame> {
                         });
                         startTimer();
                       },
-                      child: Text(
-                        'Start Game',
-                        style: TextStyle(fontSize: 18),
-                      ),
+                      child: Text('Start Game', style: TextStyle(fontSize: 18)),
                     ),
                   ],
                 ),

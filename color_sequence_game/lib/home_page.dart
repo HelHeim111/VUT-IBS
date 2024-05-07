@@ -26,13 +26,13 @@ class _MyHomePageState extends State<MyHomePage> {
     super.initState();
     _fetchLeaderboard();
   }
-
+  // Function to handle bottom navigation bar item taps
   void _onItemTapped(int index) {
     setState(() {
       _selectedIndex = index;
     });
 
-    // Handle navigation based on the selected index
+    // Navigation logic based on the tapped item index
     switch (index) {
       case 0:
       // Navigate to the home screen
@@ -48,7 +48,7 @@ class _MyHomePageState extends State<MyHomePage> {
         break;
     }
   }
-
+  // Fetch leaderboard data from Firestore, handle connectivity issues
   Future<void> _fetchLeaderboard() async {
     var connectivityResult = await (Connectivity().checkConnectivity());
     if (connectivityResult == ConnectivityResult.none) {
@@ -91,6 +91,7 @@ class _MyHomePageState extends State<MyHomePage> {
             ));
           }
         }
+        // Sort leaderboard entries by games played
         leaderboard.sort((a, b) => b.gamesPlayed.compareTo(a.gamesPlayed));
 
         setState(() {
@@ -112,7 +113,7 @@ class _MyHomePageState extends State<MyHomePage> {
     }
   }
 
-
+  // Build the UI
   @override
   Widget build(BuildContext context) {
     return Scaffold(
