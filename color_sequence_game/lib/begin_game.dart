@@ -156,9 +156,16 @@ class _BeginGameState extends State<BeginGame> {
       totalReactionTime += time;
     });
   }
-  // Calculates the average reaction time
+  // Calculates the average reaction time based on the three quickest samples
   void calculateAverageReactionTime() {
-    averageReactionTime = totalReactionTime / stmThreshold * 1000;
+    if (reactionTimes.length > 3) {
+      List<double> sortedTimes = List.from(reactionTimes);
+      sortedTimes.sort();
+      double sumFastestThree = sortedTimes.take(3).reduce((a, b) => a + b);
+      averageReactionTime = sumFastestThree / 3;
+    } else {
+      averageReactionTime = reactionTimes.reduce((a, b) => a + b) / reactionTimes.length;
+    }
   }
   // Saves user data to Firestore
   void saveUserData(double averageReactionTime, int mistakes) async {
@@ -240,6 +247,7 @@ class _BeginGameState extends State<BeginGame> {
   // Resets the game state to start a new round
   void resetGame() {
     setState(() {
+      showResults = false;
       pairsLightUp = 0;
       mistakes = 0;
       at_mistakes = 0;
@@ -362,7 +370,7 @@ class _BeginGameState extends State<BeginGame> {
                               checkSequence();
                             }
 
-                            Future.delayed(Duration(milliseconds: 200), () {
+                            Future.delayed(Duration(milliseconds: 500), () {
                               setState(() {
                                 greySquares.remove(index);
                               });

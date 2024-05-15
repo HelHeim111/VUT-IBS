@@ -1,5 +1,4 @@
 import 'package:color_sequence_game/begin_game.dart';
-import 'package:color_sequence_game/rt_game.dart';
 import 'package:color_sequence_game/user_statistics_page.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -33,7 +32,6 @@ class MyApp extends StatelessWidget {
         '/email_auth': (context) => EmailAuthWidget(),
         '/sign_up': (context) => SignUpWidget(),
         '/begin_game': (context) => BeginGame(),
-        '/rt_game': (context) => RtGame(),
         '/user_stats': (context) => UserStatisticsPage(),
       },
 
