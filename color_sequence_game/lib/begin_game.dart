@@ -274,7 +274,7 @@ class _BeginGameState extends State<BeginGame> {
   void toggleGuide() {
     setState(() {
       showGuide = !showGuide;
-      if (!firstGame) {
+      if (!firstGame && sequenceCompleted) {
         showResults = !showResults;
       }
 
