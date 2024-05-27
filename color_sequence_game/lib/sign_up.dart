@@ -14,6 +14,7 @@ class _SignUpWidgetState extends State<SignUpWidget> {
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _ageController = TextEditingController();
+  String _errorMessage = '';
 
   @override
   Widget build(BuildContext context) {
@@ -25,7 +26,7 @@ class _SignUpWidgetState extends State<SignUpWidget> {
         ),
         backgroundColor: Colors.blue[200], // Lighter background color
       ),
-      body: Padding(
+      body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -66,10 +67,31 @@ class _SignUpWidgetState extends State<SignUpWidget> {
             SizedBox(height: 16.0),
             ElevatedButton(
               onPressed: () {
+                setState(() {
+                  _errorMessage = '';
+                });
+
                 String email = _emailController.text.trim();
                 String password = _passwordController.text.trim();
                 String name = _nameController.text.trim();
-                int age = int.parse(_ageController.text.trim());
+                String ageText = _ageController.text.trim();
+
+                if (email.isEmpty || password.isEmpty || name.isEmpty || ageText.isEmpty) {
+                  setState(() {
+                    _errorMessage = 'Please fill in all fields.';
+                  });
+                  return;
+                }
+
+                int age;
+                try {
+                  age = int.parse(ageText);
+                } catch (e) {
+                  setState(() {
+                    _errorMessage = 'Age must be a valid number.';
+                  });
+                  return;
+                }
 
                 FirebaseAuth.instance
                     .createUserWithEmailAndPassword(
@@ -87,14 +109,24 @@ class _SignUpWidgetState extends State<SignUpWidget> {
                     // Navigate to the main page
                     Navigator.pushNamed(context, '/');
                   }).catchError((error) {
-                    print('Sign-in failed: $error');
+                    setState(() {
+                      _errorMessage = 'Sign-in failed: ${error.message}';
+                    });
                   });
                 }).catchError((error) {
-                  print('Sign-up failed: $error');
+                  setState(() {
+                    _errorMessage = 'Sign-up failed: ${error.message}';
+                  });
                 });
               },
               child: Text('Sign Up'),
             ),
+            SizedBox(height: 16.0),
+            if (_errorMessage.isNotEmpty)
+              Text(
+                _errorMessage,
+                style: TextStyle(color: Colors.red),
+              ),
           ],
         ),
       ),
@@ -110,14 +142,14 @@ class _SignUpWidgetState extends State<SignUpWidget> {
       'age': age,
       'games_played': 0,
     };
-    Map<String, dynamic> dummy_doc_holder = {
-      'dummy' : "dummy",
+    Map<String, dynamic> dummyDocHolder = {
+      'dummy': "dummy",
     };
 
     firestore
         .collection('users')
         .doc(user.uid)
-        .set(dummy_doc_holder)
+        .set(dummyDocHolder)
         .then((value) {
       print('Dummy placeholder added');
     }).catchError((error) {

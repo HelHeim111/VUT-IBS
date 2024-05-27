@@ -26,6 +26,7 @@ class _MyHomePageState extends State<MyHomePage> {
     super.initState();
     _fetchLeaderboard();
   }
+
   // Function to handle bottom navigation bar item taps
   void _onItemTapped(int index) {
     setState(() {
@@ -48,6 +49,7 @@ class _MyHomePageState extends State<MyHomePage> {
         break;
     }
   }
+
   // Fetch leaderboard data from Firestore, handle connectivity issues
   Future<void> _fetchLeaderboard() async {
     var connectivityResult = await (Connectivity().checkConnectivity());
@@ -130,29 +132,25 @@ class _MyHomePageState extends State<MyHomePage> {
           // Dropdown button for user options
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 8.0),
-            child: DropdownButtonHideUnderline(
-              child: DropdownButton<String>(
-                value: _auth.currentUser!.email,
-                onChanged: (String? newValue) {
-                  if (newValue == 'Sign Out') {
-                    _auth.signOut().then((_) {
-                      setState(() {}); // Refresh UI after signing out
-                    });
-                  }
-                },
-                items: <String?>[
-                  _auth.currentUser!.email,
-                  'Sign Out',
-                ].map<DropdownMenuItem<String>>((String? value) {
-                  return DropdownMenuItem<String>(
-                    value: value,
-                    child: Text(
-                      value ?? '',
-                      style: TextStyle(color: Colors.black87),
-                    ),
-                  );
-                }).toList(),
-              ),
+            child: PopupMenuButton<String>(
+              icon: Icon(Icons.account_circle, color: Colors.black87),
+              onSelected: (String value) {
+                if (value == 'Sign Out') {
+                  _auth.signOut().then((_) {
+                    setState(() {}); // Refresh UI after signing out
+                  });
+                }
+              },
+              itemBuilder: (BuildContext context) => [
+                PopupMenuItem<String>(
+                  value: _auth.currentUser!.email,
+                  child: Text(_auth.currentUser!.email!),
+                ),
+                PopupMenuItem<String>(
+                  value: 'Sign Out',
+                  child: Text('Sign Out'),
+                ),
+              ],
             ),
           ),
         ]

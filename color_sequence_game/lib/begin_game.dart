@@ -164,6 +164,10 @@ class _BeginGameState extends State<BeginGame> {
       double sumFastestThree = sortedTimes.take(3).reduce((a, b) => a + b);
       averageReactionTime = sumFastestThree / 3;
     } else {
+      if(reactionTimes.length == 0) {
+        averageReactionTime = 0.0;
+        return;
+      }
       averageReactionTime = reactionTimes.reduce((a, b) => a + b) / reactionTimes.length;
     }
   }

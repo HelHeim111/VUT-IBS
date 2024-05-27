@@ -27,11 +27,31 @@ class _EmailAuthWidgetState extends State<EmailAuthWidget> {
 
       // Navigate back to the main page upon successful authentication
       Navigator.pop(context);
-    } catch (e) {
+    } on FirebaseAuthException catch (e) {
       setState(() {
-        _errorMessage = e.toString();
+        _errorMessage = _getFriendlyErrorMessage(e.code);
       });
       print('Sign in error: $_errorMessage');
+    } catch (e) {
+      setState(() {
+        _errorMessage = 'An unexpected error occurred. Please try again later.';
+      });
+      print('Sign in error: $_errorMessage');
+    }
+  }
+
+  String _getFriendlyErrorMessage(String errorCode) {
+    switch (errorCode) {
+      case 'invalid-email':
+        return 'The email address is not valid.';
+      case 'user-disabled':
+        return 'This user account has been disabled.';
+      case 'user-not-found':
+        return 'No user found with this email.';
+      case 'wrong-password':
+        return 'Incorrect password.';
+      default:
+        return 'An unknown error occurred. Please try again.';
     }
   }
 
@@ -45,7 +65,7 @@ class _EmailAuthWidgetState extends State<EmailAuthWidget> {
         ),
         backgroundColor: Colors.blue[200], // Lighter background color
       ),
-      body: Padding(
+      body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -73,10 +93,11 @@ class _EmailAuthWidgetState extends State<EmailAuthWidget> {
               child: Text('Sign In'),
             ),
             SizedBox(height: 8.0),
-            Text(
-              _errorMessage,
-              style: TextStyle(color: Colors.red), // Error text color
-            ),
+            if (_errorMessage.isNotEmpty)
+              Text(
+                _errorMessage,
+                style: TextStyle(color: Colors.red), // Error text color
+              ),
           ],
         ),
       ),
